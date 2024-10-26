@@ -10,4 +10,8 @@ dist:
 run-exe: dist
 	./dist/__main__
 
-.PHONY: init run run-exe
+clean:
+	rm -rf dist
+	rm -rf build
+
+.PHONY: init run run-exe clean

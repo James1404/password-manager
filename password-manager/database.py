@@ -6,6 +6,8 @@ import string, secrets
 
 from typing import List
 
+from cryptography.fernet import Fernet
+
 import hashlib
 
 reg = registry()
@@ -52,6 +54,11 @@ def authenticatePassword(session: Session, email: str, password: str) -> bool:
         return hash == result.password
 
     return False
+
+def encrypt(input: str, key: str) -> str:
+    f = Fernet(key)
+    token = f.encrypt(input.encode())
+    return token.decode()
 
 @dataclass
 class Database:
