@@ -5,6 +5,8 @@ from functools import reduce
 import secrets
 import string
 
+from cryptography.fernet import Fernet
+
 rng = random.SystemRandom()
 
 def replaceWithEquivalent(c: str) -> str:
@@ -53,9 +55,9 @@ def generatePassword(minimumCharacters):
 Alphabet = string.ascii_letters + string.digits
 SaltLength = 32
 
-def hashPassword(password: str) -> tuple[str, str]:
-    salt = "".join(secrets.choice(Alphabet) for _ in range(SaltLength))
+def hashPassword(password: str) -> tuple[bytes, bytes]:
+    salt = Fernet.generate_key()
     return (
-        hashlib.sha256((password + salt).encode()).hexdigest(),
+        hashlib.sha256(password.encode() + salt).digest(),
         salt
     )

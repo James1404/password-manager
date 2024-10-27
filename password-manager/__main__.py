@@ -1,7 +1,10 @@
 import argparse, sys
 
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from .generate_password import hashPassword
-from .database import Database, Account, encrypt
+from .database import Database, Account, decrypt, encrypt
 
 parser = argparse.ArgumentParser("Password Generator")
 
@@ -22,9 +25,16 @@ james = Account(
 )
 
 db.createAccount(james)
-    
-print(f"Password: {password}")
-print(f"Salt: {salt}")
-print(f"Hash: {hashedpassword}")
 
-print(encrypt(hashedpassword, password))
+with Session(db.engine) as session:
+    stmt = select(Account).where(Account.salt.is_(salt))
+
+    if account := session.scalar(stmt):
+        print(f"Password: {password}")
+        print(f"Salt: {salt}")
+        print(f"Hash: {hashedpassword}")
+
+        encrypted = encrypt(password, account.salt)
+
+        print(encrypted)
+        print(decrypt(encrypted, account.salt))
