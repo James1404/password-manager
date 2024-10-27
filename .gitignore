@@ -163,5 +163,3 @@ cython_debug/
 
 *~
 .direnv/
-
-sensitive-info.txt
