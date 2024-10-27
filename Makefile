@@ -1,8 +1,12 @@
 init:
 	pip install -r requirements.txt
 
-run:
-	python -m password-manager
+tui:
+	python -m password-manager tui
+
+
+gui:
+	python -m password-manager gui
 
 dist:
 	pyinstaller -F password-manager/__main__.py
@@ -14,4 +18,4 @@ clean:
 	rm -rf dist
 	rm -rf build
 
-.PHONY: init run run-exe clean
+.PHONY: init tui gui run-exe clean

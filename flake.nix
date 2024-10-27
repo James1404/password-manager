@@ -9,16 +9,42 @@
   outputs = { self, flake-utils, nixpkgs, ... }:
     flake-utils.lib.eachDefaultSystem
       (system:
-        let pkgs = import nixpkgs { inherit system; }; in
-        {
-          devShells.default = pkgs.mkShell {
-            packages = with pkgs; [
+        let
+          pkgs = import nixpkgs { inherit system; };
+          envWithScript = script: (pkgs.buildFHSUserEnv {
+            name = "password manager";
+            targetPkgs = pkgs: (with pkgs; [
               (python312.withPackages (python-pkgs: with python-pkgs; [
                 debugpy
+                pip
+                virtualenv
+                pyside6
               ]))
               pyright
-            ];
-          };
+
+              # qt libraries
+              zstd
+              glib
+              libGL
+              libxkbcommon
+              fontconfig
+              xorg.libX11
+              xorg.libxcb
+              freetype
+              dbus
+
+              qt6.full
+            ]);
+            runScript = "${pkgs.writeShellScriptBin "runScript" (''
+                    set -e
+                    python -m venv .venv
+                    source .venv/bin/activate
+                    pip install -r requirements.txt
+                '' + script)}/bin/runScript ";
+          }).env;
+        in
+        {
+          devShells.default = envWithScript "bash";
         }
       );
 }

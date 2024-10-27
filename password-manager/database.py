@@ -21,7 +21,7 @@ class Account:
 
     items: Mapped[List["Item"]] = relationship(
         back_populates="account",
-        default_factory=list
+        default_factory=list,
     )
 
 @reg.mapped_as_dataclass
@@ -38,7 +38,7 @@ class Item:
     password: Mapped[bytes] = mapped_column(Text, nullable=False)
     
     account_id: Mapped[int] = mapped_column(ForeignKey("account_table.id"))
-    account: Mapped["Account"] = relationship(default=None)
+    account: Mapped[Account | None] = relationship(default=None)
 
 def encrypt(input: str, key: bytes) -> bytes:
     f = Fernet(key)
@@ -57,15 +57,15 @@ class Database:
     def __init__(self) -> None:
         reg.metadata.create_all(self.engine)
 
-    def createAccount(self, account: Account):
+    def createAccount(self, account: Account) -> Account | None:
         try:
             with Session(self.engine) as session:
                 session.add_all([account])
                 session.commit()
 
-                return True
+                return account
         except:
-            return False
+            return None
             
     def authenticatePassword(self, email: str, password: str) -> bool:
         """Authenticate an account

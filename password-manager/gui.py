@@ -23,7 +23,7 @@ class TestWidget(QtWidgets.QWidget):
         self.text.setText(random.choice(self.hello))
 
 class GUI:
-    def exec() -> int:
+    def exec(self) -> int:
         app = QtWidgets.QApplication([])
 
         widget = TestWidget()
