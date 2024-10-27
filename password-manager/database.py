@@ -15,7 +15,7 @@ class Account:
     __tablename__ = "account_table"
 
     id: Mapped[int] = mapped_column(primary_key=True,autoincrement=True,init=False)
-    email: Mapped[str] = mapped_column(Text, nullable=False)
+    email: Mapped[str] = mapped_column(Text, nullable=False,unique=True)
     password: Mapped[bytes] = mapped_column(Text, nullable=False)
     salt: Mapped[bytes] = mapped_column(Text, nullable=False)
 
@@ -40,12 +40,10 @@ class Item:
     account_id: Mapped[int] = mapped_column(ForeignKey("account_table.id"))
     account: Mapped["Account"] = relationship(default=None)
 
-
 def encrypt(input: str, key: bytes) -> bytes:
     f = Fernet(key)
     token = f.encrypt(input.encode())
     return token
-
 
 def decrypt(input: bytes, key: bytes) -> str:
     f = Fernet(key)
@@ -56,12 +54,18 @@ def decrypt(input: bytes, key: bytes) -> str:
 class Database:
     engine = create_engine('sqlite+pysqlite:///:memory:', echo=True)
 
-    reg.metadata.create_all(engine)
+    def __init__(self) -> None:
+        reg.metadata.create_all(self.engine)
 
     def createAccount(self, account: Account):
-        with Session(self.engine) as session:
-            session.add_all([account])
-            session.commit()
+        try:
+            with Session(self.engine) as session:
+                session.add_all([account])
+                session.commit()
+
+                return True
+        except:
+            return False
             
     def authenticatePassword(self, email: str, password: str) -> bool:
         """Authenticate an account

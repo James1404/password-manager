@@ -18,13 +18,17 @@ hashedpassword, salt = hashPassword(password)
 
 db = Database()
 
-james = Account(
+db.createAccount(Account(
     email='email',
     password=hashedpassword,
     salt=salt,
-)
+))
 
-db.createAccount(james)
+db.createAccount(Account(
+    email='email',
+    password=hashedpassword,
+    salt=salt,
+))
 
 with Session(db.engine) as session:
     stmt = select(Account).where(Account.salt.is_(salt))
