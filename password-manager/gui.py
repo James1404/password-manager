@@ -1,6 +1,6 @@
 import random, sys
 
-from PySide6 import QtCore, QtWidgets, QtGui
+from PySide2 import QtCore, QtWidgets, QtGui
 
 class TestWidget(QtWidgets.QWidget):
     def __init__(self):

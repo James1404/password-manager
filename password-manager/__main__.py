@@ -15,8 +15,6 @@ def main():
     parser.add_argument("--version", action='version', version="%(prog)s 0.1")
     parser.add_argument("--length", default=12, type=int, help="The minimal length the password should be")
 
-    parser.add_argument("type", choices=['tui', 'gui'])
-    
     args = parser.parse_args()
 
     load_dotenv()
@@ -59,15 +57,11 @@ def main():
             print(encrypted := encrypt(password, account.salt))
             print(decrypt(encrypted, account.salt))
 
-    match args.type:
-        case 'gui':
-            from .gui import GUI
-            app = GUI()
-            sys.exit(app.exec())
-        case 'tui':
-            from .tui import PasswordManagerApp
-            app = PasswordManagerApp()
-            app.run()
+    
 
+    from .gui import GUI
+    app = GUI()
+    sys.exit(app.exec())
+    
 if __name__ == "__main__":
     main()

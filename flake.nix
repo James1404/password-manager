@@ -18,7 +18,7 @@
                 debugpy
                 pip
                 virtualenv
-                pyside6
+                pyinstaller
               ]))
               pyright
 
@@ -29,11 +29,12 @@
               libxkbcommon
               fontconfig
               xorg.libX11
+              libkrb5
               xorg.libxcb
               freetype
               dbus
 
-              qt6.full
+              qt6.qtwayland
             ]);
             runScript = "${pkgs.writeShellScriptBin "runScript" (''
                     set -e
