@@ -57,8 +57,6 @@ def main():
             print(encrypted := encrypt(password, account.salt))
             print(decrypt(encrypted, account.salt))
 
-    
-
     from .gui import GUI
     app = GUI()
     sys.exit(app.exec())

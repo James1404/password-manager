@@ -1,32 +1,20 @@
 import random, sys
 
-from PySide2 import QtCore, QtWidgets, QtGui
-
-class TestWidget(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
-
-        self.hello = ["Hallo Welt", "Hei maailma", "Hola Mundo", "Привет мир"]
-
-        self.button = QtWidgets.QPushButton("Click me!")
-        self.text = QtWidgets.QLabel("Hello World",
-                                     alignment=QtCore.Qt.AlignCenter)
-
-        self.layout = QtWidgets.QVBoxLayout(self)
-        self.layout.addWidget(self.text)
-        self.layout.addWidget(self.button)
-
-        self.button.clicked.connect(self.magic)
-
-    @QtCore.Slot()
-    def magic(self):
-        self.text.setText(random.choice(self.hello))
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtQml import QQmlApplicationEngine
 
 class GUI:
     def exec(self) -> int:
-        app = QtWidgets.QApplication([])
+        app = QGuiApplication(sys.argv)
 
-        widget = TestWidget()
-        widget.show()
+        engine = QQmlApplicationEngine()
+        engine.addImportPath(sys.path[0])
+        engine.loadFromModule("Main", "Main")
 
-        return app.exec()
+        if not engine.rootObjects():
+            return -1
+
+        exit_code = app.exec()
+        del engine
+
+        return exit_code
