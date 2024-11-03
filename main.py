@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 
 from dotenv import load_dotenv
 
-from .generate_password import hashPassword
-from .database import Database, Account, Item, decrypt, encrypt
+from src.generate_password import hashPassword
+from src.database import Database, Account, Item, decrypt, encrypt
 
 def main():
     parser = argparse.ArgumentParser("Password Generator")
@@ -57,7 +57,7 @@ def main():
             print(encrypted := encrypt(password, account.salt))
             print(decrypt(encrypted, account.salt))
 
-    from .gui import GUI
+    from src.gui import GUI
     app = GUI()
     sys.exit(app.exec())
     
