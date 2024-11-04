@@ -1,7 +1,14 @@
 import random, sys
 
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtQml import QQmlApplicationEngine
+from PySide6 import QtCore, QtGui, QtWidgets
+
+class LoginWidget(QtWidgets.QWidget):
+    hello = ["Hallo Welt", "Hei maailma", "Hola Mundo", "Привет мир"]
+
+    def __init__(self):
+        super().__init__()
+
+        
 
 class GUI:
     def exec(self) -> int:

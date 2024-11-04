@@ -6,7 +6,7 @@ from typing import List
 
 from cryptography.fernet import Fernet
 
-import hashlib
+import hashlib, hmac
 
 reg = registry()
 
@@ -52,15 +52,20 @@ def decrypt(input: bytes, key: bytes) -> str:
 
 @dataclass
 class Database:
-    engine = create_engine('sqlite+pysqlite:///:memory:', echo=True)
+    engine = create_engine('sqlite+pysqlite:///passwords.db', echo=False)
 
     def __init__(self) -> None:
         reg.metadata.create_all(self.engine)
 
-    def createAccount(self, account: Account) -> Account | None:
+    def createAccount(self, email: str, password: str) -> Account | None:
+        salt = Fernet.generate_key()
+        hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
+
+        account = Account(email, hash, salt)
+
         try:
             with Session(self.engine) as session:
-                session.add_all([account])
+                session.add(account)
                 session.commit()
 
                 return account
@@ -74,8 +79,13 @@ class Database:
         with Session(self.engine) as session:
             stmt = select(Account).where(Account.email.is_(email))
 
+
             if result := session.scalar(stmt):
-                hash = hashlib.sha256(password.encode() + result.salt)
-                return hash == result.password
+                success = hmac.compare_digest(
+                    result.password,
+                    hashlib.pbkdf2_hmac('sha256', password.encode(), result.salt, 100000)
+                )                
+                
+                return success
 
             return False

@@ -54,10 +54,3 @@ def generatePassword(minimumCharacters):
 
 Alphabet = string.ascii_letters + string.digits
 SaltLength = 32
-
-def hashPassword(password: str) -> tuple[bytes, bytes]:
-    salt = Fernet.generate_key()
-    return (
-        hashlib.sha256(password.encode() + salt).digest(),
-        salt
-    )
