@@ -2,7 +2,7 @@
 
 A password manager for CS1032, by James Barnfather.
 
-<!-- Getting Started -->
+<!-- GETTING STARTED -->
 ## Getting Started
 
 
@@ -44,3 +44,9 @@ or
 ```sh
 make run
 ```
+
+<!-- ROADMAP -->
+## Roadmap
+
+- [ ] Add a GUI using QT6
+- [ ] Improve encryption safety
