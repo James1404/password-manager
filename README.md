@@ -2,7 +2,7 @@
 
 A password manager for CS1032, by James Barnfather.
 
-<!-- Getting Started--!>
+<!-- Getting Started -->
 
 ## Prerequisites
 
@@ -12,19 +12,19 @@ A password manager for CS1032, by James Barnfather.
 
 #### Linux
 Use:
-```console
+```sh
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
 Or:
-```console
+```sh
 make init
 ```
 
 #### Windows
-```console
+```sh
 python -m venv .venv
 .venv\Scripts\activate.bat
 pip install -r requirements.txt
@@ -32,12 +32,12 @@ pip install -r requirements.txt
 
 ## Running
 
-```console
+```sh
 python main.py
 ```
 
 or
 
-```console
+```sh
 make run
 ```
