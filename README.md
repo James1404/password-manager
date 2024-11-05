@@ -1,13 +1,16 @@
 # Password Manager
 
-## Requirements
+A password manager for CS1032, by James Barnfather.
 
-- Python 3.12
+<!-- Getting Started--!>
 
-## Setup
+## Prerequisites
 
-### Linux
+* Python 3.12
 
+### Installation
+
+#### Linux
 Use:
 ```console
 python -m venv .venv
@@ -20,7 +23,7 @@ Or:
 make init
 ```
 
-### Windows
+#### Windows
 ```console
 python -m venv .venv
 .venv\Scripts\activate.bat
