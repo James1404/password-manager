@@ -40,6 +40,11 @@ class Item:
     account_id: Mapped[int] = mapped_column(ForeignKey("account_table.id"))
     account: Mapped[Account | None] = relationship(default=None)
 
+LocalEncryptionKey = b'a local encryption key'
+
+def getKey(salt: bytes) -> bytes:
+    return salt + LocalEncryptionKey
+
 def encrypt(input: str, key: bytes) -> bytes:
     f = Fernet(key)
     token = f.encrypt(input.encode())
@@ -49,6 +54,10 @@ def decrypt(input: bytes, key: bytes) -> str:
     f = Fernet(key)
     token = f.decrypt(input)
     return token.decode()
+
+@dataclass
+class AccountAuthenticationError(BaseException):
+    msg: str
 
 @dataclass
 class Database:
@@ -72,20 +81,20 @@ class Database:
         except:
             return None
             
-    def authenticatePassword(self, email: str, password: str) -> bool:
+    def authenticateAccount(self, email: str, password: str) -> Account:
         """Authenticate an account
         """
 
         with Session(self.engine) as session:
             stmt = select(Account).where(Account.email.is_(email))
 
-
             if result := session.scalar(stmt):
-                success = hmac.compare_digest(
+                if hmac.compare_digest(
                     result.password,
                     hashlib.pbkdf2_hmac('sha256', password.encode(), result.salt, 100000)
-                )                
-                
-                return success
+                ):
+                    return result
 
-            return False
+                raise AccountAuthenticationError("Password does not match")
+
+            raise AccountAuthenticationError("Account does not exist")
