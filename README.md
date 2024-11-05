@@ -1,6 +1,7 @@
+<a id="readme-top"></a>
+
 # Password Manager
 
-A password manager for CS1032, by James Barnfather.
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -15,13 +16,20 @@ A password manager for CS1032, by James Barnfather.
     </li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#license">License</a></li>
   </ol>
 </details>
 
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+A password manager for CS1032, by James Barnfather.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- GETTING STARTED -->
 ## Getting Started
-
-
 
 ### Prerequisites
 
