@@ -3,6 +3,9 @@
 A password manager for CS1032, by James Barnfather.
 
 <!-- Getting Started -->
+## Getting Started
+
+
 
 ## Prerequisites
 
