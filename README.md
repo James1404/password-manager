@@ -6,14 +6,21 @@
 
 ## Setup
 
-On linux:
+### Linux
+
+Use:
 ```console
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-On windows:
+Or:
+```console
+make init
+```
+
+### Windows
 ```console
 python -m venv .venv
 .venv\Scripts\activate.bat
