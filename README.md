@@ -49,7 +49,8 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### Usage
+<!-- USAGE -->
+## Usage
 
 ```sh
 python main.py
