@@ -33,7 +33,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## Running
+### Running
 
 ```sh
 python main.py
