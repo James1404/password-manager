@@ -7,7 +7,7 @@ A password manager for CS1032, by James Barnfather.
 
 
 
-## Prerequisites
+### Prerequisites
 
 * Python 3.12
 
