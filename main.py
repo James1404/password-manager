@@ -11,31 +11,24 @@ from dotenv import dotenv_values, load_dotenv
 from src.database import AccountAuthenticationError, Database, Account, Item, decrypt, encrypt
 
 class AccountInterpreter(Cmd):
-    db: Database = Database()
-    
-    def __init__(self, database: Database, account: Account, completekey: str = "tab", stdin: IO[str] | None = None, stdout: IO[str] | None = None) -> None:
+    def __init__(self, session: Session, account: Account, completekey: str = "tab", stdin: IO[str] | None = None, stdout: IO[str] | None = None) -> None:
         super().__init__(completekey, stdin, stdout)
-        self.db = database
+        self.session = session
         self.account = account
         self.prompt = f"({self.account.email}) "
 
-    def do_quit(self, _):
-        "Quit the app"
-        return True
-
-    def do_exit(self, _):
-        "Exit the app"
+    def do_logout(self, _):
+        "Logout the current account"
         return True
 
     def do_get_items(self, _):
-        with Session(self.db.engine) as session:
-            print(self.account.id)
-            stmt = select(Item).where(Item.account_id.is_(self.account.id))
+        print(self.account.id)
+        stmt = select(Item).where(Item.account_id.is_(self.account.id))
 
-            items = session.scalars(stmt)
+        items = self.session.scalars(stmt)
 
-            for item in items:
-                print(item)
+        for item in items:
+            print(item)
 
 
 class MainInterpreter(Cmd):
@@ -43,7 +36,7 @@ class MainInterpreter(Cmd):
     prompt = "(Getting Started) "
     
     db: Database = Database()
-
+    
     def do_quit(self, _):
         "Quit the app"
         return True
@@ -52,25 +45,33 @@ class MainInterpreter(Cmd):
         "Exit the app"
         return True
 
+    def do_close(self, _):
+        "Close the app"
+        return True
+
     def do_login(self, _):
         "Login to an account"
         email = input("Email: ")
         password = getpass.getpass("Password: ")
 
-        try:
-            account = self.db.authenticateAccount(email, password)
-            print("Successfully logged in")
-
-            AccountInterpreter(self.db, account).cmdloop()
-        except AccountAuthenticationError as exc:
-            print(exc)
+        with Session(self.db.engine) as session:
+            try:
+                account = self.db.authenticateAccount(session, email, password)
+                print("Successfully logged in")
+                
+                AccountInterpreter(session, account).cmdloop()
+            except AccountAuthenticationError as exc:
+                print(exc)
 
     def do_create_account(self, _):
         "Create a new account with an email and password"
         email = input("Email: ")
         password = getpass.getpass("Password: ")
 
-        self.db.createAccount(email, password)
+        with Session(self.db.engine) as session:
+            account = self.db.createAccount(session, email, password)
+
+            AccountInterpreter(self.db, account).cmdloop()
 
     def do_get_accounts(self, _):
         "Get all registered accounts via their email"

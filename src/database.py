@@ -66,35 +66,30 @@ class Database:
     def __init__(self) -> None:
         reg.metadata.create_all(self.engine)
 
-    def createAccount(self, email: str, password: str) -> Account | None:
+    def createAccount(self, session: Session, email: str, password: str) -> Account:
         salt = Fernet.generate_key()
         hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
 
         account = Account(email, hash, salt)
 
-        try:
-            with Session(self.engine) as session:
-                session.add(account)
-                session.commit()
+        session.add(account)
+        session.commit()
 
-                return account
-        except:
-            return None
+        return account
             
-    def authenticateAccount(self, email: str, password: str) -> Account:
+    def authenticateAccount(self, session: Session, email: str, password: str) -> Account:
         """Authenticate an account
         """
 
-        with Session(self.engine) as session:
-            stmt = select(Account).where(Account.email.is_(email))
+        stmt = select(Account).where(Account.email.is_(email))
 
-            if result := session.scalar(stmt):
-                if hmac.compare_digest(
-                    result.password,
-                    hashlib.pbkdf2_hmac('sha256', password.encode(), result.salt, 100000)
-                ):
-                    return result
+        if result := session.scalar(stmt):
+            if hmac.compare_digest(
+                result.password,
+                hashlib.pbkdf2_hmac('sha256', password.encode(), result.salt, 100000)
+            ):
+                return result
 
-                raise AccountAuthenticationError("Password does not match")
-
-            raise AccountAuthenticationError("Account does not exist")
+            raise AccountAuthenticationError("Password does not match")
+        
+        raise AccountAuthenticationError("Account does not exist")
