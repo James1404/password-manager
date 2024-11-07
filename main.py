@@ -9,11 +9,13 @@ from sqlalchemy.orm import Session
 from dotenv import dotenv_values, load_dotenv
 
 from src.database import AccountAuthenticationError, Database, Account, Item, decrypt, encrypt
+from src.generate_password import generatePassword
 
 class AccountInterpreter(Cmd):
-    def __init__(self, session: Session, account: Account, completekey: str = "tab", stdin: IO[str] | None = None, stdout: IO[str] | None = None) -> None:
-        super().__init__(completekey, stdin, stdout)
-        self.session = session
+    def __init__(self, db: Database, account: Account) -> None:
+        super().__init__()
+
+        self.db = db
         self.account = account
         self.prompt = f"({self.account.email}) "
 
@@ -25,7 +27,7 @@ class AccountInterpreter(Cmd):
         print(self.account.id)
         stmt = select(Item).where(Item.account_id.is_(self.account.id))
 
-        items = self.session.scalars(stmt)
+        items = self.db.scalars(stmt)
 
         for item in items:
             print(item)
@@ -35,7 +37,10 @@ class MainInterpreter(Cmd):
     intro = "Create an account with the 'create_account' command; or login with the 'login' command"
     prompt = "(Getting Started) "
     
-    db: Database = Database()
+    def __init__(self, db: Database, completekey: str = "tab", stdin: IO[str] | None = None, stdout: IO[str] | None = None) -> None:
+        super().__init__(completekey, stdin, stdout)
+
+        self.db = db
     
     def do_quit(self, _):
         "Quit the app"
@@ -54,54 +59,50 @@ class MainInterpreter(Cmd):
         email = input("Email: ")
         password = getpass.getpass("Password: ")
 
-        with Session(self.db.engine) as session:
-            try:
-                account = self.db.authenticateAccount(session, email, password)
-                print("Successfully logged in")
+        try:
+            account = self.db.authenticateAccount(email, password)
+            print("Successfully logged in")
                 
-                AccountInterpreter(session, account).cmdloop()
-            except AccountAuthenticationError as exc:
-                print(exc)
+            AccountInterpreter(self.db, account).cmdloop()
+        except AccountAuthenticationError as exc:
+            print(exc)
 
     def do_create_account(self, _):
         "Create a new account with an email and password"
         email = input("Email: ")
         password = getpass.getpass("Password: ")
 
-        with Session(self.db.engine) as session:
-            account = self.db.createAccount(session, email, password)
-
+        if account := self.db.createAccount(email, password):
             AccountInterpreter(self.db, account).cmdloop()
 
     def do_get_accounts(self, _):
         "Get all registered accounts via their email"
-        with Session(self.db.engine) as session:
-            stmt = select(Account)
-            accounts = session.scalars(stmt)
-            for account in accounts:
-                print(account.email)
+        stmt = select(Account)
+        accounts = self.db.scalars(stmt)
+        for account in accounts:
+            print(account.email)
 
     def do_delete_account(self, _):
         "Delete an account via it's email: delete_account exampleEmail@gmail.com"
 
         email = input("Email: ")
 
-        with Session(self.db.engine) as session:
-            print(f"Deleting '{email}' account")
-            session.query(Account).where(Account.email.is_(email)).delete()
-            session.commit()
+        print(f"Deleting '{email}' account")
+        self.db.query(Account).where(Account.email.is_(email)).delete()
+        self.db.commit()
 
     def do_reset(self, _):
         "Delete all accounts and their bound items"
-        with Session(self.db.engine) as session:
-            print("Resetting databse")
-            session.query(Account).delete()
-            session.query(Item).delete()
-            session.commit()  
+
+        print("Resetting databse")
+        self.db.query(Account).delete()
+        self.db.query(Item).delete()
+        self.db.commit()  
 
 def main():
-    app = MainInterpreter()
-    app.cmdloop()
+    with Database() as db:
+        app = MainInterpreter(db)
+        app.cmdloop()
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from sqlalchemy import ForeignKey, Text, create_engine, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, Mapped, mapped_column, registry, relationship
 
 from typing import List
@@ -60,30 +61,41 @@ class AccountAuthenticationError(BaseException):
     msg: str
 
 @dataclass
-class Database:
+class Database(Session):
     engine = create_engine('sqlite+pysqlite:///passwords.db', echo=False)
 
-    def __init__(self) -> None:
+    def __init__(self):
+        super().__init__(self.engine, expire_on_commit=True)
         reg.metadata.create_all(self.engine)
 
-    def createAccount(self, session: Session, email: str, password: str) -> Account:
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
+    def createAccount(self, email: str, password: str) -> Account | None:
         salt = Fernet.generate_key()
         hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
 
         account = Account(email, hash, salt)
 
-        session.add(account)
-        session.commit()
-
-        return account
+        try:
+            self.add(account)
+            self.commit()
+        except IntegrityError:
+            print("Account already exists")
+            return None
             
-    def authenticateAccount(self, session: Session, email: str, password: str) -> Account:
+        return account
+
+    def authenticateAccount(self, email: str, password: str) -> Account:
         """Authenticate an account
         """
 
         stmt = select(Account).where(Account.email.is_(email))
 
-        if result := session.scalar(stmt):
+        if result := self.scalar(stmt):
             if hmac.compare_digest(
                 result.password,
                 hashlib.pbkdf2_hmac('sha256', password.encode(), result.salt, 100000)
